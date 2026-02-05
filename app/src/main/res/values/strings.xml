@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Petnames</string>
+    
+    <!-- Onboarding -->
+    <string name="onboarding_title">Petnames by Kinder</string>
+    <string name="onboarding_subtitle">Vind samen de perfecte naam voor jullie huisdier</string>
+    <string name="create_household">Start nieuw household</string>
+    <string name="join_household">Join bestaand household</string>
+    <string name="enter_name">Je naam</string>
+    <string name="enter_invite_code">Invite code</string>
+    <string name="join">Deelnemen</string>
+    <string name="or">OF</string>
+    <string name="share_code">Deel deze code</string>
+    <string name="continue_to_app">Verder naar de app</string>
+    
+    <!-- Home -->
+    <string name="loading_names">Namen laden…</string>
+    <string name="no_more_names">Geen namen meer</string>
+    <string name="no_more_names_description">Je hebt alle namen gezien!\nPas je filters aan voor meer namen.</string>
+    <string name="adjust_filters">Pas filters aan</string>
+    
+    <!-- Filters -->
+    <string name="filters">Filters</string>
+    <string name="languages">Talen</string>
+    <string name="styles">Stijlen</string>
+    <string name="gender">Geslacht</string>
+    <string name="starts_with">Begint met</string>
+    <string name="max_length">Max. lengte</string>
+    <string name="any">Alle</string>
+    <string name="male">Mannelijk</string>
+    <string name="female">Vrouwelijk</string>
+    <string name="neutral">Neutraal</string>
+    <string name="apply">Toepassen</string>
+    <string name="reset">Reset</string>
+    
+    <!-- Styles -->
+    <string name="style_cute">Lief &amp; Schattig</string>
+    <string name="style_strong">Kort &amp; Stoer</string>
+    <string name="style_classic">Klassiek</string>
+    <string name="style_funny">Speels &amp; Grappig</string>
+    <string name="style_vintage">Nostalgisch</string>
+    <string name="style_nature">Natuur</string>
+    <string name="style_petnicknames">Koosnamen</string>
+    
+    <!-- Matches -->
+    <string name="matches">Matches</string>
+    <string name="no_matches">Nog geen matches</string>
+    <string name="no_matches_description">Als twee of meer mensen in je household dezelfde naam leuk vinden, verschijnt die hier!</string>
+    <string name="likes">%d likes</string>
+    <string name="liked_by">Geliked door</string>
+    
+    <!-- Likes -->
+    <string name="my_likes">Mijn Likes</string>
+    <string name="no_likes">Nog geen likes</string>
+    <string name="no_likes_description">Namen die je leuk vindt verschijnen hier.</string>
+    
+    <!-- Profile -->
+    <string name="profile">Profiel</string>
+    <string name="your_household">Jouw Household</string>
+    <string name="copy">Kopiëren</string>
+    <string name="share">Delen</string>
+    <string name="household_members">Household leden</string>
+    <string name="your_stats">Jouw statistieken</string>
+    <string name="liked">Geliked</string>
+    <string name="dismissed">Geweigerd</string>
+    <string name="reset_household">Reset Household</string>
+    <string name="about">Over Petnames</string>
+    
+    <!-- Match Popup -->
+    <string name="its_a_match">It\'s a Match!</string>
+    <string name="match_description">Jullie vinden allebei %s een geweldige naam!</string>
+    <string name="view_matches">Bekijk matches</string>
+    <string name="keep_swiping">Blijf swipen</string>
+    
+    <!-- Errors -->
+    <string name="error">Fout</string>
+    <string name="ok">OK</string>
+    <string name="unknown_error">Er is iets misgegaan</string>
+    <string name="invalid_invite_code">Ongeldige invite code</string>
+</resources>
