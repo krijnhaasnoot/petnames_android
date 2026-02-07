@@ -18,25 +18,26 @@ class HouseholdRepository @Inject constructor(
     
     /**
      * Create a new household
+     * Uses display_name parameter (matching iOS and Supabase function signature)
      */
     suspend fun createHousehold(memberName: String): CreateHouseholdResponse {
         return supabase.postgrest.rpc(
             function = "create_household",
             parameters = buildJsonObject {
-                put("p_member_name", memberName)
+                put("display_name", memberName)
             }
         ).decodeSingle<CreateHouseholdResponse>()
     }
     
     /**
      * Join an existing household with invite code
+     * Uses invite_code parameter (matching iOS and Supabase function signature)
      */
     suspend fun joinHousehold(inviteCode: String, memberName: String): JoinHouseholdResponse {
         return supabase.postgrest.rpc(
             function = "join_household",
             parameters = buildJsonObject {
-                put("p_invite_code", inviteCode.uppercase())
-                put("p_member_name", memberName)
+                put("invite_code", inviteCode.uppercase())
             }
         ).decodeSingle<JoinHouseholdResponse>()
     }

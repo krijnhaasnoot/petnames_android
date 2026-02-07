@@ -135,7 +135,7 @@ fun OnboardingScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier.weight(1f),
                         color = Color.White.copy(alpha = 0.3f)
                     )
@@ -144,7 +144,7 @@ fun OnboardingScreen(
                         color = Color.White.copy(alpha = 0.7f),
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier.weight(1f),
                         color = Color.White.copy(alpha = 0.3f)
                     )
