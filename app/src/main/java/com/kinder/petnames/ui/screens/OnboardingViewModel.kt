@@ -3,8 +3,8 @@ package com.kinder.petnames.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kinder.petnames.core.AnalyticsManager
-import com.kinder.petnames.core.NotificationManager
 import com.kinder.petnames.core.PreferencesManager
+import com.kinder.petnames.core.PushNotificationManager
 import com.kinder.petnames.core.SessionManager
 import com.kinder.petnames.data.HouseholdRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +27,7 @@ class OnboardingViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val analyticsManager: AnalyticsManager,
     private val sessionManager: SessionManager,
-    private val notificationManager: NotificationManager
+    private val pushNotificationManager: PushNotificationManager
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -130,7 +130,7 @@ class OnboardingViewModel @Inject constructor(
                 registerForPushNotifications()
                 
                 // Send push notification to other household members
-                notificationManager.sendNewMemberPushToHousehold(
+                pushNotificationManager.sendNewMemberPushToHousehold(
                     householdId = response.householdId,
                     memberName = name.ifBlank { "Iemand" }
                 )
@@ -161,7 +161,7 @@ class OnboardingViewModel @Inject constructor(
     private fun registerForPushNotifications() {
         viewModelScope.launch {
             try {
-                notificationManager.registerForPushNotifications()
+                pushNotificationManager.registerForPushNotifications()
                 analyticsManager.trackNotificationPermissionGranted()
             } catch (e: Exception) {
                 println("⚠️ Failed to register for push notifications: ${e.message}")

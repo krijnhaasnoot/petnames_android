@@ -1,7 +1,6 @@
 package com.kinder.petnames.core
 
 import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -17,12 +16,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @AndroidEntryPoint
 class PetnamesFirebaseMessagingService : FirebaseMessagingService() {
     
     @Inject
-    lateinit var notificationManager: NotificationManager
+    lateinit var pushNotificationManager: PushNotificationManager
     
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     
@@ -35,10 +33,10 @@ class PetnamesFirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         println("📱 New FCM token received: $token")
         
-        // Save token to server via NotificationManager
+        // Save token to server via PushNotificationManager
         serviceScope.launch {
             try {
-                notificationManager.handleNewToken(token)
+                pushNotificationManager.handleNewToken(token)
             } catch (e: Exception) {
                 println("❌ Failed to handle new token: ${e.message}")
             }

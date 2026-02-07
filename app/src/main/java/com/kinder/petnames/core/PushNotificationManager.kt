@@ -2,7 +2,6 @@ package com.kinder.petnames.core
 
 import android.Manifest
 import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -21,9 +20,10 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.app.NotificationManager as AndroidNotificationManager
 
 @Singleton
-class NotificationManager @Inject constructor(
+class PushNotificationManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val supabase: SupabaseClient,
     private val sessionManager: SessionManager
@@ -53,12 +53,12 @@ class NotificationManager @Inject constructor(
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
+                AndroidNotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = CHANNEL_DESCRIPTION
             }
             
-            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as AndroidNotificationManager
             manager.createNotificationChannel(channel)
         }
     }
