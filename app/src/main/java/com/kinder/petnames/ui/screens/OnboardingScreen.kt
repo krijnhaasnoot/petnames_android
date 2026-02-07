@@ -2,8 +2,13 @@ package com.kinder.petnames.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,44 +44,60 @@ fun OnboardingScreen(
         }
     }
     
+    // Light background like iOS
+    val backgroundColor = Color(0xFFF2F2F7)
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(PrimaryPurple, PrimaryPurpleDark)
-                )
-            )
+            .background(backgroundColor)
             .systemBarsPadding()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo/Title
-            Text(
-                text = "🐾",
-                fontSize = 64.sp
-            )
+            Spacer(modifier = Modifier.height(40.dp))
             
+            // App Icon
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(PrimaryPurple, PrimaryPurpleDark)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "🐾",
+                    fontSize = 40.sp
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Title
             Text(
-                text = stringResource(R.string.onboarding_title),
-                fontSize = 28.sp,
+                text = "Petnames",
+                fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center
+                color = Color.Black
             )
             
             Text(
                 text = stringResource(R.string.onboarding_subtitle),
-                fontSize = 16.sp,
-                color = Color.White.copy(alpha = 0.9f),
+                fontSize = 17.sp,
+                color = Color.Gray,
                 textAlign = TextAlign.Center
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             
             // Show invite code if created
             if (uiState.createdInviteCode != null) {
@@ -85,126 +106,274 @@ fun OnboardingScreen(
                     onContinue = { viewModel.completeOnboarding() }
                 )
             } else {
-                // Name input
-                OutlinedTextField(
-                    value = uiState.memberName,
-                    onValueChange = { viewModel.updateMemberName(it) },
-                    label = { Text(stringResource(R.string.enter_name)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Done
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                        cursorColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                // Create button
-                Button(
-                    onClick = { viewModel.createHousehold() },
-                    enabled = uiState.memberName.isNotBlank() && !uiState.isLoading,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = PrimaryPurple
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                // Name Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    if (uiState.isLoading && uiState.inviteCode.isBlank()) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = PrimaryPurple
-                        )
-                    } else {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
                         Text(
-                            text = stringResource(R.string.create_household),
-                            fontWeight = FontWeight.Bold
+                            text = "Hoe mag je partner je noemen?",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black
+                        )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        OutlinedTextField(
+                            value = uiState.memberName,
+                            onValueChange = { viewModel.updateMemberName(it) },
+                            placeholder = { 
+                                Text(
+                                    "Je naam (optioneel)",
+                                    color = Color.Gray
+                                ) 
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Words,
+                                imeAction = ImeAction.Done
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryPurple,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedContainerColor = Color(0xFFF8F8F8),
+                                unfocusedContainerColor = Color(0xFFF8F8F8)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "Dit ziet je partner als jullie samen swipen",
+                            fontSize = 13.sp,
+                            color = Color.Gray
                         )
                     }
                 }
                 
-                // Divider
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Create Household Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text(
+                            text = "Nieuw household starten",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        Text(
+                            text = "Maak een household aan en deel de code met je partner",
+                            fontSize = 13.sp,
+                            color = Color.Gray
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Button(
+                            onClick = { viewModel.createHousehold() },
+                            enabled = !uiState.isLoading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            colors = listOf(PrimaryPurple, PrimaryPurpleDark)
+                                        )
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (uiState.isLoading && uiState.inviteCode.isBlank()) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = null,
+                                            tint = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Maak household",
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // OR Divider
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     HorizontalDivider(
                         modifier = Modifier.weight(1f),
-                        color = Color.White.copy(alpha = 0.3f)
+                        color = Color.LightGray
                     )
                     Text(
-                        text = stringResource(R.string.or),
-                        color = Color.White.copy(alpha = 0.7f),
+                        text = "OR",
+                        color = Color.Gray,
+                        fontSize = 13.sp,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                     HorizontalDivider(
                         modifier = Modifier.weight(1f),
-                        color = Color.White.copy(alpha = 0.3f)
+                        color = Color.LightGray
                     )
                 }
                 
-                // Join section
-                OutlinedTextField(
-                    value = uiState.inviteCode,
-                    onValueChange = { viewModel.updateInviteCode(it.uppercase()) },
-                    label = { Text(stringResource(R.string.enter_invite_code)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Characters,
-                        imeAction = ImeAction.Done
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                        cursorColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Spacer(modifier = Modifier.height(24.dp))
                 
-                Button(
-                    onClick = { viewModel.joinHousehold() },
-                    enabled = uiState.inviteCode.length >= 6 && 
-                             uiState.memberName.isNotBlank() && 
-                             !uiState.isLoading,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White.copy(alpha = 0.2f),
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                // Join Household Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    if (uiState.isLoading && uiState.inviteCode.isNotBlank()) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color.White
-                        )
-                    } else {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
                         Text(
-                            text = stringResource(R.string.join),
-                            fontWeight = FontWeight.Bold
+                            text = "Bestaand household joinen",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black
+                        )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        OutlinedTextField(
+                            value = uiState.inviteCode,
+                            onValueChange = { viewModel.updateInviteCode(it.uppercase()) },
+                            placeholder = { 
+                                Text(
+                                    "Voer invite code in",
+                                    color = Color.Gray
+                                ) 
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Characters,
+                                imeAction = ImeAction.Done
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryPurple,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedContainerColor = Color(0xFFF8F8F8),
+                                unfocusedContainerColor = Color(0xFFF8F8F8)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        OutlinedButton(
+                            onClick = { viewModel.joinHousehold() },
+                            enabled = uiState.inviteCode.length >= 6 && !uiState.isLoading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = PrimaryPurple
+                            ),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(PrimaryPurple, PrimaryPurpleDark)
+                                )
+                            )
+                        ) {
+                            if (uiState.isLoading && uiState.inviteCode.isNotBlank()) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = PrimaryPurple,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.People,
+                                        contentDescription = null,
+                                        tint = PrimaryPurple
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Join household",
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Error message
+                if (uiState.errorMessage != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFFFEBEE)
+                        )
+                    ) {
+                        Text(
+                            text = uiState.errorMessage!!,
+                            color = Color(0xFFD32F2F),
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
             }
             
-            // Error message
-            if (uiState.errorMessage != null) {
-                Text(
-                    text = uiState.errorMessage!!,
-                    color = Color.Red.copy(alpha = 0.9f),
-                    textAlign = TextAlign.Center
-                )
-            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -216,65 +385,113 @@ private fun InviteCodeDisplay(
 ) {
     val clipboardManager = LocalClipboardManager.current
     
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Text(
-            text = stringResource(R.string.share_code),
-            color = Color.White.copy(alpha = 0.9f)
-        )
-        
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White.copy(alpha = 0.15f))
-                .padding(24.dp)
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = code,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                letterSpacing = 4.sp
+                text = "🎉",
+                fontSize = 48.sp
             )
-        }
-        
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            OutlinedButton(
-                onClick = { clipboardManager.setText(AnnotatedString(code)) },
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color.White
-                )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = "Household aangemaakt!",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "Deel deze code met je partner",
+                fontSize = 15.sp,
+                color = Color.Gray
+            )
+            
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            // Code display
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF2F2F7))
+                    .padding(horizontal = 32.dp, vertical = 16.dp)
             ) {
-                Text(stringResource(R.string.copy))
+                Text(
+                    text = code,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryPurple,
+                    letterSpacing = 4.sp
+                )
             }
             
-            OutlinedButton(
-                onClick = { /* TODO: Share intent */ },
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color.White
-                )
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(stringResource(R.string.share))
+                OutlinedButton(
+                    onClick = { clipboardManager.setText(AnnotatedString(code)) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = PrimaryPurple
+                    )
+                ) {
+                    Text("Kopieer")
+                }
+                
+                OutlinedButton(
+                    onClick = { /* TODO: Share intent */ },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = PrimaryPurple
+                    )
+                ) {
+                    Text("Deel")
+                }
             }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Button(
-            onClick = onContinue,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = PrimaryPurple
-            )
-        ) {
-            Text(
-                text = stringResource(R.string.continue_to_app),
-                fontWeight = FontWeight.Bold
-            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Button(
+                onClick = onContinue,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent
+                ),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(PrimaryPurple, PrimaryPurpleDark)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Ga verder",
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
         }
     }
 }
