@@ -2,6 +2,7 @@ package com.kinder.petnames.ui.screens;
 
 import com.kinder.petnames.core.AnalyticsManager;
 import com.kinder.petnames.core.PreferencesManager;
+import com.kinder.petnames.core.SessionManager;
 import com.kinder.petnames.data.HouseholdRepository;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -31,28 +32,34 @@ public final class OnboardingViewModel_Factory implements Factory<OnboardingView
 
   private final Provider<AnalyticsManager> analyticsManagerProvider;
 
+  private final Provider<SessionManager> sessionManagerProvider;
+
   public OnboardingViewModel_Factory(Provider<HouseholdRepository> householdRepositoryProvider,
       Provider<PreferencesManager> preferencesManagerProvider,
-      Provider<AnalyticsManager> analyticsManagerProvider) {
+      Provider<AnalyticsManager> analyticsManagerProvider,
+      Provider<SessionManager> sessionManagerProvider) {
     this.householdRepositoryProvider = householdRepositoryProvider;
     this.preferencesManagerProvider = preferencesManagerProvider;
     this.analyticsManagerProvider = analyticsManagerProvider;
+    this.sessionManagerProvider = sessionManagerProvider;
   }
 
   @Override
   public OnboardingViewModel get() {
-    return newInstance(householdRepositoryProvider.get(), preferencesManagerProvider.get(), analyticsManagerProvider.get());
+    return newInstance(householdRepositoryProvider.get(), preferencesManagerProvider.get(), analyticsManagerProvider.get(), sessionManagerProvider.get());
   }
 
   public static OnboardingViewModel_Factory create(
       Provider<HouseholdRepository> householdRepositoryProvider,
       Provider<PreferencesManager> preferencesManagerProvider,
-      Provider<AnalyticsManager> analyticsManagerProvider) {
-    return new OnboardingViewModel_Factory(householdRepositoryProvider, preferencesManagerProvider, analyticsManagerProvider);
+      Provider<AnalyticsManager> analyticsManagerProvider,
+      Provider<SessionManager> sessionManagerProvider) {
+    return new OnboardingViewModel_Factory(householdRepositoryProvider, preferencesManagerProvider, analyticsManagerProvider, sessionManagerProvider);
   }
 
   public static OnboardingViewModel newInstance(HouseholdRepository householdRepository,
-      PreferencesManager preferencesManager, AnalyticsManager analyticsManager) {
-    return new OnboardingViewModel(householdRepository, preferencesManager, analyticsManager);
+      PreferencesManager preferencesManager, AnalyticsManager analyticsManager,
+      SessionManager sessionManager) {
+    return new OnboardingViewModel(householdRepository, preferencesManager, analyticsManager, sessionManager);
   }
 }

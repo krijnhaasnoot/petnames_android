@@ -6,6 +6,7 @@ import com.kinder.petnames.domain.JoinHouseholdResponse
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.rpc
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import javax.inject.Inject
@@ -16,17 +17,25 @@ class HouseholdRepository @Inject constructor(
     private val supabase: SupabaseClient
 ) {
     
+    private val json = Json { ignoreUnknownKeys = true }
+    
     /**
      * Create a new household
      * Uses display_name parameter (matching iOS and Supabase function signature)
      */
     suspend fun createHousehold(memberName: String): CreateHouseholdResponse {
-        return supabase.postgrest.rpc(
+        val result = supabase.postgrest.rpc(
             function = "create_household",
             parameters = buildJsonObject {
-                put("display_name", memberName)
+                put("display_name", memberName.ifBlank { null })
             }
-        ).decodeSingle<CreateHouseholdResponse>()
+        )
+        
+        // Get raw response body and parse manually
+        val responseBody = result.data
+        println("📦 Create household response: $responseBody")
+        
+        return json.decodeFromString<CreateHouseholdResponse>(responseBody)
     }
     
     /**
@@ -34,12 +43,18 @@ class HouseholdRepository @Inject constructor(
      * Uses invite_code parameter (matching iOS and Supabase function signature)
      */
     suspend fun joinHousehold(inviteCode: String, memberName: String): JoinHouseholdResponse {
-        return supabase.postgrest.rpc(
+        val result = supabase.postgrest.rpc(
             function = "join_household",
             parameters = buildJsonObject {
                 put("invite_code", inviteCode.uppercase())
             }
-        ).decodeSingle<JoinHouseholdResponse>()
+        )
+        
+        // Get raw response body and parse manually
+        val responseBody = result.data
+        println("📦 Join household response: $responseBody")
+        
+        return json.decodeFromString<JoinHouseholdResponse>(responseBody)
     }
     
     /**
