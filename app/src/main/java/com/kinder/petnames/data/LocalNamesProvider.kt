@@ -105,8 +105,10 @@ class LocalNamesProvider @Inject constructor(
                     entry.setSlug.equals(setId, ignoreCase = true)
                 }
                 
-                // Filter by gender
-                val genderMatches = gender == "any" || entry.gender.equals(gender, ignoreCase = true)
+                // Filter by gender (neutral names always pass through, like iOS)
+                val genderMatches = gender == "any" || 
+                    entry.gender.equals(gender, ignoreCase = true) ||
+                    entry.gender.equals("neutral", ignoreCase = true)
                 
                 // Filter by starts with
                 val startsWithMatches = startsWith == "any" || 

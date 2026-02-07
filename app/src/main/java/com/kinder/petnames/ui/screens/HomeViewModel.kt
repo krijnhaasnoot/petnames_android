@@ -45,6 +45,7 @@ class HomeViewModel @Inject constructor(
     
     private var householdId: String? = null
     private var userId: String? = null
+    private var hasLoadedInitial = false
     
     init {
         viewModelScope.launch {
@@ -52,7 +53,8 @@ class HomeViewModel @Inject constructor(
             launch {
                 preferencesManager.householdId.collect { id ->
                     householdId = id
-                    if (id != null && _uiState.value.cardStack.isEmpty()) {
+                    if (id != null && !hasLoadedInitial) {
+                        hasLoadedInitial = true
                         loadAllNames()
                     }
                 }
@@ -60,6 +62,24 @@ class HomeViewModel @Inject constructor(
             launch {
                 preferencesManager.userId.collect { id ->
                     userId = id
+                }
+            }
+            
+            // Watch for filter changes and reload names
+            launch {
+                // Combine all filter-related flows
+                combine(
+                    preferencesManager.filters,
+                    preferencesManager.selectedLanguages,
+                    preferencesManager.enabledStyles
+                ) { filters, languages, styles ->
+                    Triple(filters, languages, styles)
+                }.collect {
+                    // Only reload if we've already loaded initial data and have householdId
+                    if (hasLoadedInitial && householdId != null) {
+                        println("🔄 Filters changed, reloading names...")
+                        loadAllNames()
+                    }
                 }
             }
         }
