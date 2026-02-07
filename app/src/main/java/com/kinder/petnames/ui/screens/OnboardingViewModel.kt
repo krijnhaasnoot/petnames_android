@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kinder.petnames.core.AnalyticsManager
 import com.kinder.petnames.core.PreferencesManager
+import com.kinder.petnames.core.SessionManager
 import com.kinder.petnames.data.HouseholdRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -23,7 +24,8 @@ data class OnboardingUiState(
 class OnboardingViewModel @Inject constructor(
     private val householdRepository: HouseholdRepository,
     private val preferencesManager: PreferencesManager,
-    private val analyticsManager: AnalyticsManager
+    private val analyticsManager: AnalyticsManager,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -50,13 +52,15 @@ class OnboardingViewModel @Inject constructor(
     
     fun createHousehold() {
         val name = _uiState.value.memberName.trim()
-        if (name.isBlank()) return
         
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             
             try {
-                val response = householdRepository.createHousehold(name)
+                // Sign in anonymously first
+                sessionManager.signInAnonymouslyIfNeeded()
+                
+                val response = householdRepository.createHousehold(name.ifBlank { null } ?: "")
                 
                 // Save to preferences
                 preferencesManager.setHouseholdId(response.householdId)
@@ -73,6 +77,8 @@ class OnboardingViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                println("❌ Create household error: ${e.message}")
+                e.printStackTrace()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -86,12 +92,15 @@ class OnboardingViewModel @Inject constructor(
     fun joinHousehold() {
         val name = _uiState.value.memberName.trim()
         val code = _uiState.value.inviteCode.trim()
-        if (name.isBlank() || code.length < 6) return
+        if (code.length < 6) return
         
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             
             try {
+                // Sign in anonymously first
+                sessionManager.signInAnonymouslyIfNeeded()
+                
                 val response = householdRepository.joinHousehold(code, name)
                 
                 // Save to preferences
@@ -109,6 +118,8 @@ class OnboardingViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                println("❌ Join household error: ${e.message}")
+                e.printStackTrace()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
