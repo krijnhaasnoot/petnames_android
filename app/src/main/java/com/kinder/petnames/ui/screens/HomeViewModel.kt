@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kinder.petnames.core.AnalyticsManager
 import com.kinder.petnames.core.PreferencesManager
+import com.kinder.petnames.core.SessionManager
 import com.kinder.petnames.data.NamesRepository
 import com.kinder.petnames.data.SwipesRepository
 import com.kinder.petnames.domain.NameCard
@@ -35,7 +36,8 @@ class HomeViewModel @Inject constructor(
     private val namesRepository: NamesRepository,
     private val swipesRepository: SwipesRepository,
     private val preferencesManager: PreferencesManager,
-    private val analyticsManager: AnalyticsManager
+    private val analyticsManager: AnalyticsManager,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -109,8 +111,15 @@ class HomeViewModel @Inject constructor(
     
     fun likeCard() {
         val card = _uiState.value.cardStack.firstOrNull() ?: return
-        val hId = householdId ?: return
-        val uId = userId ?: return
+        val hId = householdId ?: run {
+            println("❌ likeCard: No householdId")
+            return
+        }
+        val uId = userId ?: sessionManager.currentUserId.value ?: run {
+            println("❌ likeCard: No userId")
+            return
+        }
+        println("✅ likeCard: ${card.name}, hId=$hId, uId=$uId")
         
         // Save last swipe for undo
         _uiState.update {
@@ -171,8 +180,15 @@ class HomeViewModel @Inject constructor(
     
     fun dismissCard() {
         val card = _uiState.value.cardStack.firstOrNull() ?: return
-        val hId = householdId ?: return
-        val uId = userId ?: return
+        val hId = householdId ?: run {
+            println("❌ dismissCard: No householdId")
+            return
+        }
+        val uId = userId ?: sessionManager.currentUserId.value ?: run {
+            println("❌ dismissCard: No userId")
+            return
+        }
+        println("✅ dismissCard: ${card.name}, hId=$hId, uId=$uId")
         
         // Save last swipe for undo
         _uiState.update {
@@ -213,7 +229,7 @@ class HomeViewModel @Inject constructor(
     fun undoSwipe() {
         val lastSwipe = _uiState.value.lastSwipe ?: return
         val hId = householdId ?: return
-        val uId = userId ?: return
+        val uId = userId ?: sessionManager.currentUserId.value ?: return
         
         // Restore card
         _uiState.update {

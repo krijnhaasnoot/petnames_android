@@ -60,6 +60,11 @@ class OnboardingViewModel @Inject constructor(
                 // Sign in anonymously first
                 sessionManager.signInAnonymouslyIfNeeded()
                 
+                // Save user ID to preferences
+                sessionManager.currentUserId.value?.let { userId ->
+                    preferencesManager.setUserId(userId)
+                }
+                
                 val response = householdRepository.createHousehold(name.ifBlank { null } ?: "")
                 
                 // Save to preferences
@@ -100,6 +105,11 @@ class OnboardingViewModel @Inject constructor(
             try {
                 // Sign in anonymously first
                 sessionManager.signInAnonymouslyIfNeeded()
+                
+                // Save user ID to preferences
+                sessionManager.currentUserId.value?.let { userId ->
+                    preferencesManager.setUserId(userId)
+                }
                 
                 val response = householdRepository.joinHousehold(code, name)
                 
