@@ -34,6 +34,11 @@ fun LikesScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
+    // Refresh likes when screen becomes visible
+    LaunchedEffect(Unit) {
+        viewModel.loadLikes()
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(

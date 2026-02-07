@@ -96,14 +96,13 @@ class LocalNamesProvider @Inject constructor(
         excludeNames: Set<String>,
         limit: Int
     ): List<LocalNameEntry> {
+        println("🔍 Filtering names with enabledSetIds: $enabledSetIds")
+        
         return allNames
             .filter { entry ->
-                // Filter by enabled sets (by language/style slug matching)
+                // Filter by enabled sets - EXACT slug matching only
                 val setMatches = enabledSetIds.isEmpty() || enabledSetIds.any { setId ->
-                    entry.setSlug.contains(setId, ignoreCase = true) ||
-                    setId.contains(entry.language, ignoreCase = true) ||
-                    setId.contains(entry.style, ignoreCase = true) ||
-                    entry.setSlug == setId
+                    entry.setSlug.equals(setId, ignoreCase = true)
                 }
                 
                 // Filter by gender
@@ -120,6 +119,9 @@ class LocalNamesProvider @Inject constructor(
                 val notExcluded = !excludeNames.contains(entry.name.lowercase())
                 
                 setMatches && genderMatches && startsWithMatches && lengthMatches && notExcluded
+            }
+            .also { 
+                println("✅ Found ${it.size} matching names") 
             }
             .take(limit)
     }

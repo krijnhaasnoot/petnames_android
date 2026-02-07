@@ -137,9 +137,16 @@ class HomeViewModel @Inject constructor(
             gender = card.gender
         )
         
-        // Mark as swiped locally
+        // Mark as swiped locally and save like
         viewModelScope.launch {
             namesRepository.markNameAsSwiped(card.name)
+            
+            // Save like locally (offline-first)
+            preferencesManager.addLocalLike(
+                name = card.name,
+                gender = card.gender,
+                setTitle = card.setTitle
+            )
             
             // Sync to server
             try {
@@ -243,9 +250,14 @@ class HomeViewModel @Inject constructor(
         // Track analytics
         analyticsManager.trackSwipeUndone()
         
-        // Remove from swiped names
+        // Remove from swiped names and local likes if it was a like
         viewModelScope.launch {
             namesRepository.undoSwipe(lastSwipe.card.name)
+            
+            // Remove from local likes if this was a like
+            if (lastSwipe.decision == SwipeDecision.LIKE) {
+                preferencesManager.removeLocalLike(lastSwipe.card.name)
+            }
             
             // Sync to server
             if (!lastSwipe.card.isLocal) {

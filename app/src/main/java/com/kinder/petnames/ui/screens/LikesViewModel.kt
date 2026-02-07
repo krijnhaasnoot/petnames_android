@@ -10,6 +10,7 @@ import com.kinder.petnames.domain.LikedNameRow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 data class LikesUiState(
@@ -35,23 +36,23 @@ class LikesViewModel @Inject constructor(
     
     fun loadLikes() {
         viewModelScope.launch {
-            val householdId = preferencesManager.householdId.first() ?: run {
-                println("❌ LikesViewModel: No householdId")
-                return@launch
-            }
-            val userId = preferencesManager.userId.first() 
-                ?: sessionManager.currentUserId.value 
-                ?: run {
-                    println("❌ LikesViewModel: No userId")
-                    return@launch
-                }
-            
-            println("📋 Loading likes for household=$householdId, user=$userId")
+            println("📋 Loading likes from local storage")
             _uiState.update { it.copy(isLoading = true) }
             
             try {
-                val likes = swipesRepository.fetchLikes(householdId, userId)
-                println("✅ Got ${likes.size} likes")
+                // Load local likes (offline-first)
+                val localLikes = preferencesManager.localLikes.first()
+                println("✅ Got ${localLikes.size} local likes")
+                
+                val likes = localLikes.map { like ->
+                    LikedNameRow(
+                        nameId = UUID.randomUUID().toString(),
+                        name = like.name,
+                        gender = like.gender,
+                        setTitle = like.setTitle
+                    )
+                }
+                
                 _uiState.update {
                     it.copy(
                         likes = likes,

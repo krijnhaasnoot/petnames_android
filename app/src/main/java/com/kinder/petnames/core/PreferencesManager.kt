@@ -176,6 +176,59 @@ class PreferencesManager @Inject constructor(
         }
     }
     
+    // Local Likes (for offline-first experience)
+    @kotlinx.serialization.Serializable
+    data class LocalLike(
+        val name: String,
+        val gender: String,
+        val setTitle: String
+    )
+    
+    val localLikes: Flow<List<LocalLike>> = dataStore.data.map { prefs ->
+        val json = prefs[LOCAL_LIKES] ?: return@map emptyList()
+        try {
+            Json.decodeFromString<List<LocalLike>>(json)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    suspend fun addLocalLike(name: String, gender: String, setTitle: String) {
+        dataStore.edit { prefs ->
+            val current = try {
+                val json = prefs[LOCAL_LIKES] ?: "[]"
+                Json.decodeFromString<MutableList<LocalLike>>(json)
+            } catch (e: Exception) {
+                mutableListOf()
+            }
+            // Don't add duplicates
+            if (current.none { it.name.equals(name, ignoreCase = true) }) {
+                current.add(LocalLike(name, gender, setTitle))
+                prefs[LOCAL_LIKES] = Json.encodeToString(current)
+                println("✅ Added local like: $name (total: ${current.size})")
+            }
+        }
+    }
+    
+    suspend fun removeLocalLike(name: String) {
+        dataStore.edit { prefs ->
+            val current = try {
+                val json = prefs[LOCAL_LIKES] ?: "[]"
+                Json.decodeFromString<MutableList<LocalLike>>(json)
+            } catch (e: Exception) {
+                mutableListOf()
+            }
+            current.removeAll { it.name.equals(name, ignoreCase = true) }
+            prefs[LOCAL_LIKES] = Json.encodeToString(current)
+        }
+    }
+    
+    suspend fun clearLocalLikes() {
+        dataStore.edit { prefs ->
+            prefs.remove(LOCAL_LIKES)
+        }
+    }
+    
     // Clear household (for reset)
     suspend fun clearHousehold() {
         dataStore.edit { prefs ->
