@@ -176,74 +176,24 @@ class NotificationManager @Inject constructor(
     
     /**
      * Send push notification to other household members via Edge Function
+     * Note: This requires a Supabase Edge Function "send-push" to be set up
+     * For now, this is a no-op since Edge Functions require additional setup
      */
     suspend fun sendMatchPushToHousehold(householdId: String, name: String) {
-        val userId = sessionManager.currentUserId.value ?: return
-        
-        try {
-            @Serializable
-            data class Payload(val name: String)
-            
-            @Serializable
-            data class PushRequest(
-                val type: String,
-                val household_id: String,
-                val exclude_user_id: String,
-                val payload: Payload
-            )
-            
-            val request = PushRequest(
-                type = "match",
-                household_id = householdId,
-                exclude_user_id = userId,
-                payload = Payload(name)
-            )
-            
-            supabase.functions.invoke(
-                function = "send-push",
-                body = request
-            )
-            
-            println("✅ Push notification sent to household members")
-        } catch (e: Exception) {
-            println("⚠️ Failed to send push to household: ${e.message}")
-            // Non-critical - local notification already shown
-        }
+        // Edge Functions require additional Supabase setup
+        // For now, just log the intent - the local notification will still show
+        println("📤 Would send match push to household $householdId for name: $name")
+        // TODO: Implement when Supabase Edge Function "send-push" is deployed
     }
     
     /**
      * Send push notification when new member joins
+     * Note: This requires a Supabase Edge Function "send-push" to be set up
      */
     suspend fun sendNewMemberPushToHousehold(householdId: String, memberName: String) {
-        val userId = sessionManager.currentUserId.value ?: return
-        
-        try {
-            @Serializable
-            data class Payload(val member_name: String)
-            
-            @Serializable
-            data class PushRequest(
-                val type: String,
-                val household_id: String,
-                val exclude_user_id: String,
-                val payload: Payload
-            )
-            
-            val request = PushRequest(
-                type = "new_member",
-                household_id = householdId,
-                exclude_user_id = userId,
-                payload = Payload(memberName)
-            )
-            
-            supabase.functions.invoke(
-                function = "send-push",
-                body = request
-            )
-            
-            println("✅ New member push sent to household")
-        } catch (e: Exception) {
-            println("⚠️ Failed to send new member push: ${e.message}")
-        }
+        // Edge Functions require additional Supabase setup
+        // For now, just log the intent
+        println("📤 Would send new member push to household for: $memberName")
+        // TODO: Implement when Supabase Edge Function "send-push" is deployed
     }
 }
