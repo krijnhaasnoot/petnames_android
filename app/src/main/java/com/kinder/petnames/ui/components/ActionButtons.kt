@@ -1,7 +1,9 @@
 package com.kinder.petnames.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -9,13 +11,15 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kinder.petnames.ui.theme.*
@@ -31,6 +35,17 @@ fun ActionButton(
     enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
+    var isPressed by remember { mutableStateOf(false) }
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.85f else 1f,
+        animationSpec = spring(
+            dampingRatio = 0.5f,
+            stiffness = 400f
+        ),
+        label = "buttonScale"
+    )
+    
     val (icon, backgroundColor, iconColor, size) = when (type) {
         ActionButtonType.LIKE -> ActionButtonStyle(
             icon = Icons.Default.Favorite,
@@ -55,12 +70,32 @@ fun ActionButton(
     Box(
         modifier = modifier
             .size(size)
-            .shadow(8.dp, CircleShape)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .shadow(
+                elevation = if (isPressed) 4.dp else 8.dp,
+                shape = CircleShape
+            )
             .clip(CircleShape)
             .background(
                 if (enabled) backgroundColor else backgroundColor.copy(alpha = 0.4f)
             )
-            .clickable(enabled = enabled, onClick = onClick),
+            .pointerInput(enabled) {
+                if (enabled) {
+                    detectTapGestures(
+                        onPress = {
+                            isPressed = true
+                            tryAwaitRelease()
+                            isPressed = false
+                        },
+                        onTap = {
+                            onClick()
+                        }
+                    )
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Icon(
