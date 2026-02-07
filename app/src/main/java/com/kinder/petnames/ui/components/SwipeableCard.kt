@@ -50,51 +50,14 @@ fun SwipeableCard(
     val density = LocalDensity.current
     val screenWidthPx = with(density) { screenWidthDp.toPx() }
     
-    // Animation states - use Float for smoother animations
+    // Direct state for dragging - NO animation during drag
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
-    var rotation by remember { mutableFloatStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
+    var isAnimatingOut by remember { mutableStateOf(false) }
     
-    // Animated values for smooth transitions
-    val animatedOffsetX by animateFloatAsState(
-        targetValue = offsetX,
-        animationSpec = if (isDragging) {
-            snap() // Instant while dragging
-        } else {
-            spring(
-                dampingRatio = 0.7f,
-                stiffness = Spring.StiffnessMedium
-            )
-        },
-        label = "offsetX"
-    )
-    
-    val animatedOffsetY by animateFloatAsState(
-        targetValue = offsetY,
-        animationSpec = if (isDragging) {
-            snap()
-        } else {
-            spring(
-                dampingRatio = 0.7f,
-                stiffness = Spring.StiffnessMedium
-            )
-        },
-        label = "offsetY"
-    )
-    
-    val animatedRotation by animateFloatAsState(
-        targetValue = rotation,
-        animationSpec = if (isDragging) {
-            snap()
-        } else {
-            spring(
-                dampingRatio = 0.7f,
-                stiffness = Spring.StiffnessMedium
-            )
-        },
-        label = "rotation"
-    )
+    // Calculate rotation from offset
+    val rotation = offsetX * AppConfig.CARD_ROTATION_MULTIPLIER
     
     val scope = rememberCoroutineScope()
     
@@ -118,12 +81,12 @@ fun SwipeableCard(
     }
     
     // Swipe intensity for visual feedback (0 to 1)
-    val swipeIntensity = (abs(animatedOffsetX) / 150f).coerceIn(0f, 1f)
+    val swipeIntensity = (abs(offsetX) / 150f).coerceIn(0f, 1f)
     
     // Swipe direction color overlay
     val swipeOverlayColor = when {
-        animatedOffsetX > 30 -> LikeGreen.copy(alpha = swipeIntensity * 0.4f)
-        animatedOffsetX < -30 -> DismissRed.copy(alpha = swipeIntensity * 0.4f)
+        offsetX > 30 -> LikeGreen.copy(alpha = swipeIntensity * 0.4f)
+        offsetX < -30 -> DismissRed.copy(alpha = swipeIntensity * 0.4f)
         else -> Color.Transparent
     }
     
@@ -132,14 +95,15 @@ fun SwipeableCard(
             .fillMaxWidth()
             .padding(horizontal = 32.dp)
             .graphicsLayer {
-                translationX = animatedOffsetX
-                translationY = animatedOffsetY + yOffset
-                rotationZ = animatedRotation
+                // Direct values - no animation wrapper
+                translationX = offsetX
+                translationY = offsetY + yOffset
+                rotationZ = rotation
                 scaleX = scale
                 scaleY = scale
             }
             .then(
-                if (isTopCard) {
+                if (isTopCard && !isAnimatingOut) {
                     Modifier.pointerInput(card.id) {
                         val velocityTracker = VelocityTracker()
                         
@@ -152,9 +116,8 @@ fun SwipeableCard(
                                 isDragging = false
                                 val velocity = velocityTracker.calculateVelocity()
                                 val threshold = AppConfig.SWIPE_THRESHOLD * density.density
-                                val velocityThreshold = 800f // px/s
+                                val velocityThreshold = 800f
                                 
-                                // Check if swipe threshold reached OR velocity is high enough
                                 val shouldSwipeRight = offsetX > threshold || 
                                     (offsetX > 50 && velocity.x > velocityThreshold)
                                 val shouldSwipeLeft = offsetX < -threshold || 
@@ -162,44 +125,88 @@ fun SwipeableCard(
                                 
                                 when {
                                     shouldSwipeRight -> {
-                                        // Animate off screen right - fast!
+                                        isAnimatingOut = true
                                         scope.launch {
+                                            // Quick fly-off animation
                                             val targetX = screenWidthPx * 1.5f
-                                            val steps = 8
-                                            val stepDelay = 15L // ~120fps feel
+                                            val startX = offsetX
+                                            val startRotation = rotation
+                                            val targetRotation = 20f
                                             
-                                            for (i in 1..steps) {
-                                                val progress = i.toFloat() / steps
-                                                val eased = 1f - (1f - progress) * (1f - progress) // easeOut
-                                                offsetX = offsetX + (targetX - offsetX) * eased * 0.3f
-                                                rotation = rotation + (20f - rotation) * eased * 0.3f
-                                                kotlinx.coroutines.delay(stepDelay)
+                                            // Animate over ~150ms
+                                            val duration = 150
+                                            val startTime = System.currentTimeMillis()
+                                            
+                                            while (System.currentTimeMillis() - startTime < duration) {
+                                                val elapsed = (System.currentTimeMillis() - startTime).toFloat()
+                                                val progress = (elapsed / duration).coerceIn(0f, 1f)
+                                                // Ease out quad
+                                                val eased = 1f - (1f - progress) * (1f - progress)
+                                                
+                                                offsetX = startX + (targetX - startX) * eased
+                                                // rotation is calculated from offsetX
+                                                
+                                                kotlinx.coroutines.delay(8) // ~120fps
                                             }
+                                            
+                                            offsetX = targetX
                                             onSwipe(SwipeDirection.RIGHT)
                                         }
                                     }
                                     shouldSwipeLeft -> {
-                                        // Animate off screen left - fast!
+                                        isAnimatingOut = true
                                         scope.launch {
                                             val targetX = -screenWidthPx * 1.5f
-                                            val steps = 8
-                                            val stepDelay = 15L
+                                            val startX = offsetX
                                             
-                                            for (i in 1..steps) {
-                                                val progress = i.toFloat() / steps
+                                            val duration = 150
+                                            val startTime = System.currentTimeMillis()
+                                            
+                                            while (System.currentTimeMillis() - startTime < duration) {
+                                                val elapsed = (System.currentTimeMillis() - startTime).toFloat()
+                                                val progress = (elapsed / duration).coerceIn(0f, 1f)
                                                 val eased = 1f - (1f - progress) * (1f - progress)
-                                                offsetX = offsetX + (targetX - offsetX) * eased * 0.3f
-                                                rotation = rotation + (-20f - rotation) * eased * 0.3f
-                                                kotlinx.coroutines.delay(stepDelay)
+                                                
+                                                offsetX = startX + (targetX - startX) * eased
+                                                
+                                                kotlinx.coroutines.delay(8)
                                             }
+                                            
+                                            offsetX = targetX
                                             onSwipe(SwipeDirection.LEFT)
                                         }
                                     }
                                     else -> {
-                                        // Return to center with spring
-                                        offsetX = 0f
-                                        offsetY = 0f
-                                        rotation = 0f
+                                        // Spring back to center
+                                        scope.launch {
+                                            val startX = offsetX
+                                            val startY = offsetY
+                                            
+                                            // Spring animation ~300ms
+                                            val duration = 300
+                                            val startTime = System.currentTimeMillis()
+                                            
+                                            while (System.currentTimeMillis() - startTime < duration) {
+                                                val elapsed = (System.currentTimeMillis() - startTime).toFloat()
+                                                val progress = (elapsed / duration).coerceIn(0f, 1f)
+                                                
+                                                // Spring-like ease out with overshoot
+                                                val eased = if (progress < 0.5f) {
+                                                    2f * progress * progress
+                                                } else {
+                                                    val t = progress - 0.5f
+                                                    0.5f + 2f * t * (1f - t) + 0.5f * (1f - (1f - 2f * t) * (1f - 2f * t))
+                                                }.coerceIn(0f, 1f)
+                                                
+                                                offsetX = startX * (1f - eased)
+                                                offsetY = startY * (1f - eased)
+                                                
+                                                kotlinx.coroutines.delay(8)
+                                            }
+                                            
+                                            offsetX = 0f
+                                            offsetY = 0f
+                                        }
                                     }
                                 }
                             },
@@ -207,7 +214,6 @@ fun SwipeableCard(
                                 isDragging = false
                                 offsetX = 0f
                                 offsetY = 0f
-                                rotation = 0f
                             },
                             onDrag = { change, dragAmount ->
                                 change.consume()
@@ -216,10 +222,9 @@ fun SwipeableCard(
                                     change.position
                                 )
                                 
-                                // Update position immediately
+                                // DIRECT update - no animation, instant tracking
                                 offsetX += dragAmount.x
-                                offsetY += dragAmount.y * 0.3f // Reduced vertical movement
-                                rotation = offsetX * AppConfig.CARD_ROTATION_MULTIPLIER
+                                offsetY += dragAmount.y * 0.3f
                             }
                         )
                     }
@@ -234,13 +239,13 @@ fun SwipeableCard(
                 .shadow(
                     elevation = if (swipeIntensity > 0.3f) 24.dp else 16.dp,
                     shape = RoundedCornerShape(24.dp),
-                    ambientColor = if (animatedOffsetX > 30) LikeGreen.copy(alpha = 0.3f)
-                                  else if (animatedOffsetX < -30) DismissRed.copy(alpha = 0.3f)
+                    ambientColor = if (offsetX > 30) LikeGreen.copy(alpha = 0.3f)
+                                  else if (offsetX < -30) DismissRed.copy(alpha = 0.3f)
                                   else Color.Black.copy(alpha = 0.2f)
                 )
                 .clip(RoundedCornerShape(24.dp))
                 .background(Brush.linearGradient(gradientColors))
-                .background(swipeOverlayColor), // Swipe color overlay
+                .background(swipeOverlayColor),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -291,7 +296,7 @@ fun SwipeableCard(
             // Swipe indicators - circular like iOS
             if (isTopCard) {
                 // Like indicator (left side when swiping right)
-                if (animatedOffsetX > 30) {
+                if (offsetX > 30) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopStart)
@@ -317,7 +322,7 @@ fun SwipeableCard(
                 }
                 
                 // Nope indicator (right side when swiping left)
-                if (animatedOffsetX < -30) {
+                if (offsetX < -30) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
