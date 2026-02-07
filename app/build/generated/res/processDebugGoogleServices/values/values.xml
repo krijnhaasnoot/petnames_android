@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">1064662207499</string>
+    <string name="google_api_key" translatable="false">AIzaSyCm5JTmCLP9HdMx6_qmV_KhpQUfwK9UIbo</string>
+    <string name="google_app_id" translatable="false">1:1064662207499:android:5550b1186838729ce3cb0e</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCm5JTmCLP9HdMx6_qmV_KhpQUfwK9UIbo</string>
+    <string name="google_storage_bucket" translatable="false">petnames-android.firebasestorage.app</string>
+    <string name="project_id" translatable="false">petnames-android</string>
+</resources>
