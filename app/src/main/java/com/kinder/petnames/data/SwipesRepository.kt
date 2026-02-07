@@ -13,6 +13,35 @@ import kotlinx.serialization.json.put
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Data classes for Supabase responses
+@Serializable
+private data class SwipeWithName(
+    @SerialName("name_id") val nameId: String,
+    val names: NameDataResponse? = null
+)
+
+@Serializable
+private data class NameDataResponse(
+    val name: String,
+    val gender: String,
+    @SerialName("name_sets") val nameSets: SetDataResponse? = null
+)
+
+@Serializable
+private data class SetDataResponse(
+    val title: String
+)
+
+@Serializable
+private data class SwipeByNameResult(
+    @SerialName("is_match") val isMatch: Boolean = false
+)
+
+@Serializable
+private data class MatchCheckResult(
+    @SerialName("is_match") val isMatch: Boolean = false
+)
+
 @Singleton
 class SwipesRepository @Inject constructor(
     private val supabase: SupabaseClient
@@ -53,11 +82,6 @@ class SwipesRepository @Inject constructor(
         decision: SwipeDecision
     ): Boolean {
         println("📝 Inserting swipe by name: $name, decision=${decision.value}")
-        
-        @Serializable
-        data class SwipeByNameResult(
-            @SerialName("is_match") val isMatch: Boolean = false
-        )
         
         return try {
             val result = supabase.postgrest.rpc(
@@ -102,11 +126,6 @@ class SwipesRepository @Inject constructor(
         name: String,
         userId: String
     ): Boolean {
-        @Serializable
-        data class MatchCheckResult(
-            @SerialName("is_match") val isMatch: Boolean = false
-        )
-        
         return try {
             val result = supabase.postgrest.rpc(
                 function = "check_match_by_name",
@@ -130,26 +149,8 @@ class SwipesRepository @Inject constructor(
     suspend fun fetchLikes(householdId: String, userId: String): List<LikedNameRow> {
         println("📋 Fetching likes for household=$householdId, user=$userId")
         
-        @Serializable
-        data class SwipeWithName(
-            @SerialName("name_id") val nameId: String,
-            val names: NameData?
-        )
-        
-        @Serializable
-        data class NameData(
-            val name: String,
-            val gender: String,
-            @SerialName("name_sets") val nameSets: SetData?
-        )
-        
-        @Serializable
-        data class SetData(
-            val title: String
-        )
-        
         return try {
-            val swipes = supabase.postgrest
+            val swipes: List<SwipeWithName> = supabase.postgrest
                 .from("swipes")
                 .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("""
                     name_id,
