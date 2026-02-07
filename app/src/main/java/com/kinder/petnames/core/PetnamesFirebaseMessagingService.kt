@@ -11,8 +11,20 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.kinder.petnames.MainActivity
 import com.kinder.petnames.R
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class PetnamesFirebaseMessagingService : FirebaseMessagingService() {
+    
+    @Inject
+    lateinit var notificationManager: NotificationManager
+    
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     
     companion object {
         private const val CHANNEL_ID = "petnames_matches"
@@ -21,8 +33,16 @@ class PetnamesFirebaseMessagingService : FirebaseMessagingService() {
     
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        // TODO: Send token to Supabase for push notifications
-        println("📱 New FCM token: $token")
+        println("📱 New FCM token received: $token")
+        
+        // Save token to server via NotificationManager
+        serviceScope.launch {
+            try {
+                notificationManager.handleNewToken(token)
+            } catch (e: Exception) {
+                println("❌ Failed to handle new token: ${e.message}")
+            }
+        }
     }
     
     override fun onMessageReceived(message: RemoteMessage) {
@@ -36,18 +56,18 @@ class PetnamesFirebaseMessagingService : FirebaseMessagingService() {
     }
     
     private fun showNotification(title: String, body: String, type: String) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         
         // Create channel for Android O+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
+                android.app.NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "Notifications for matches and household activity"
             }
-            notificationManager.createNotificationChannel(channel)
+            systemNotificationManager.createNotificationChannel(channel)
         }
         
         // Create intent
@@ -73,6 +93,6 @@ class PetnamesFirebaseMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .build()
         
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        systemNotificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
 }

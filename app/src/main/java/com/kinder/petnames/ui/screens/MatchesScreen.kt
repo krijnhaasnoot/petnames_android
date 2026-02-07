@@ -37,6 +37,11 @@ fun MatchesScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
+    // Refresh matches when screen becomes visible
+    LaunchedEffect(Unit) {
+        viewModel.refresh()
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(

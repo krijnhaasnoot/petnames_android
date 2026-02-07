@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import android.content.Intent
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +36,19 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+    
+    fun shareInviteCode() {
+        val code = uiState.inviteCode ?: return
+        val shareText = "Doe mee met mijn Petnames household! Gebruik code: $code"
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, "Deel invite code")
+        context.startActivity(shareIntent)
+    }
     
     Scaffold(
         topBar = {
@@ -113,7 +128,7 @@ fun ProfileScreen(
                                     Text(stringResource(R.string.copy))
                                 }
                                 
-                                OutlinedButton(onClick = { /* TODO: Share */ }) {
+                                OutlinedButton(onClick = { shareInviteCode() }) {
                                     Icon(Icons.Default.Share, contentDescription = null)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(stringResource(R.string.share))

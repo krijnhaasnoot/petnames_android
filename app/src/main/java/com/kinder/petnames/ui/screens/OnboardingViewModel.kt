@@ -3,6 +3,7 @@ package com.kinder.petnames.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kinder.petnames.core.AnalyticsManager
+import com.kinder.petnames.core.NotificationManager
 import com.kinder.petnames.core.PreferencesManager
 import com.kinder.petnames.core.SessionManager
 import com.kinder.petnames.data.HouseholdRepository
@@ -25,7 +26,8 @@ class OnboardingViewModel @Inject constructor(
     private val householdRepository: HouseholdRepository,
     private val preferencesManager: PreferencesManager,
     private val analyticsManager: AnalyticsManager,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val notificationManager: NotificationManager
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -75,6 +77,9 @@ class OnboardingViewModel @Inject constructor(
                 analyticsManager.trackHouseholdCreated()
                 analyticsManager.trackOnboardingCompleted("create")
                 
+                // Register for push notifications
+                registerForPushNotifications()
+                
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -121,6 +126,15 @@ class OnboardingViewModel @Inject constructor(
                 analyticsManager.trackHouseholdJoined()
                 analyticsManager.trackOnboardingCompleted("join")
                 
+                // Register for push notifications
+                registerForPushNotifications()
+                
+                // Send push notification to other household members
+                notificationManager.sendNewMemberPushToHousehold(
+                    householdId = response.householdId,
+                    memberName = name.ifBlank { "Iemand" }
+                )
+                
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -142,5 +156,17 @@ class OnboardingViewModel @Inject constructor(
     
     fun completeOnboarding() {
         _uiState.update { it.copy(isOnboarded = true) }
+    }
+    
+    private fun registerForPushNotifications() {
+        viewModelScope.launch {
+            try {
+                notificationManager.registerForPushNotifications()
+                analyticsManager.trackNotificationPermissionGranted()
+            } catch (e: Exception) {
+                println("⚠️ Failed to register for push notifications: ${e.message}")
+                analyticsManager.trackNotificationPermissionDenied()
+            }
+        }
     }
 }
