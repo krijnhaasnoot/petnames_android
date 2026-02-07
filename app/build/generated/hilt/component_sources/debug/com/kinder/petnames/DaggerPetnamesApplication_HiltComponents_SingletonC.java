@@ -416,35 +416,35 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_kinder_petnames_ui_screens_HomeViewModel = "com.kinder.petnames.ui.screens.HomeViewModel";
-
-      static String com_kinder_petnames_ui_screens_FiltersViewModel = "com.kinder.petnames.ui.screens.FiltersViewModel";
+      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
 
       static String com_kinder_petnames_ui_screens_ProfileViewModel = "com.kinder.petnames.ui.screens.ProfileViewModel";
 
-      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
-
-      static String com_kinder_petnames_ui_screens_OnboardingViewModel = "com.kinder.petnames.ui.screens.OnboardingViewModel";
+      static String com_kinder_petnames_ui_screens_HomeViewModel = "com.kinder.petnames.ui.screens.HomeViewModel";
 
       static String com_kinder_petnames_ui_screens_LikesViewModel = "com.kinder.petnames.ui.screens.LikesViewModel";
 
-      @KeepFieldType
-      HomeViewModel com_kinder_petnames_ui_screens_HomeViewModel2;
+      static String com_kinder_petnames_ui_screens_FiltersViewModel = "com.kinder.petnames.ui.screens.FiltersViewModel";
 
-      @KeepFieldType
-      FiltersViewModel com_kinder_petnames_ui_screens_FiltersViewModel2;
-
-      @KeepFieldType
-      ProfileViewModel com_kinder_petnames_ui_screens_ProfileViewModel2;
+      static String com_kinder_petnames_ui_screens_OnboardingViewModel = "com.kinder.petnames.ui.screens.OnboardingViewModel";
 
       @KeepFieldType
       MatchesViewModel com_kinder_petnames_ui_screens_MatchesViewModel2;
 
       @KeepFieldType
-      OnboardingViewModel com_kinder_petnames_ui_screens_OnboardingViewModel2;
+      ProfileViewModel com_kinder_petnames_ui_screens_ProfileViewModel2;
+
+      @KeepFieldType
+      HomeViewModel com_kinder_petnames_ui_screens_HomeViewModel2;
 
       @KeepFieldType
       LikesViewModel com_kinder_petnames_ui_screens_LikesViewModel2;
+
+      @KeepFieldType
+      FiltersViewModel com_kinder_petnames_ui_screens_FiltersViewModel2;
+
+      @KeepFieldType
+      OnboardingViewModel com_kinder_petnames_ui_screens_OnboardingViewModel2;
     }
   }
 
@@ -502,33 +502,33 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
     private static final class LazyClassKeyProvider {
       static String com_kinder_petnames_ui_screens_FiltersViewModel = "com.kinder.petnames.ui.screens.FiltersViewModel";
 
-      static String com_kinder_petnames_ui_screens_ProfileViewModel = "com.kinder.petnames.ui.screens.ProfileViewModel";
-
       static String com_kinder_petnames_ui_screens_OnboardingViewModel = "com.kinder.petnames.ui.screens.OnboardingViewModel";
-
-      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
 
       static String com_kinder_petnames_ui_screens_LikesViewModel = "com.kinder.petnames.ui.screens.LikesViewModel";
 
+      static String com_kinder_petnames_ui_screens_ProfileViewModel = "com.kinder.petnames.ui.screens.ProfileViewModel";
+
       static String com_kinder_petnames_ui_screens_HomeViewModel = "com.kinder.petnames.ui.screens.HomeViewModel";
+
+      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
 
       @KeepFieldType
       FiltersViewModel com_kinder_petnames_ui_screens_FiltersViewModel2;
 
       @KeepFieldType
-      ProfileViewModel com_kinder_petnames_ui_screens_ProfileViewModel2;
-
-      @KeepFieldType
       OnboardingViewModel com_kinder_petnames_ui_screens_OnboardingViewModel2;
-
-      @KeepFieldType
-      MatchesViewModel com_kinder_petnames_ui_screens_MatchesViewModel2;
 
       @KeepFieldType
       LikesViewModel com_kinder_petnames_ui_screens_LikesViewModel2;
 
       @KeepFieldType
+      ProfileViewModel com_kinder_petnames_ui_screens_ProfileViewModel2;
+
+      @KeepFieldType
       HomeViewModel com_kinder_petnames_ui_screens_HomeViewModel2;
+
+      @KeepFieldType
+      MatchesViewModel com_kinder_petnames_ui_screens_MatchesViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {

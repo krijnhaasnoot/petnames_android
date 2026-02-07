@@ -7,13 +7,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -53,14 +51,14 @@ fun SwipeableCard(
     
     // Stack visual effects
     val scale = 1f - (stackIndex * 0.04f)
-    val yOffset = stackIndex * 18f
+    val yOffset = stackIndex * 12f
     
-    // Gender-based gradient colors
+    // Gender-based solid gradient colors (NO transparency)
     val gradientColors = when (card.gender.lowercase()) {
-        "female" -> listOf(FemaleColor, FemaleColor.copy(alpha = 0.7f))
-        "male" -> listOf(MaleColor, MaleColor.copy(alpha = 0.7f))
-        "neutral" -> listOf(NeutralColor, NeutralColor.copy(alpha = 0.7f))
-        else -> listOf(LikeGreen, LikeGreenLight)
+        "female" -> listOf(Color(0xFFE91E8C), Color(0xFFFF6EB4))
+        "male" -> listOf(Color(0xFF2196F3), Color(0xFF64B5F6))
+        "neutral" -> listOf(Color(0xFF9C27B0), Color(0xFFBA68C8))
+        else -> listOf(Color(0xFF4CAF50), Color(0xFF81C784))
     }
     
     val genderSymbol = when (card.gender.lowercase()) {
@@ -73,7 +71,7 @@ fun SwipeableCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 32.dp)
             .graphicsLayer {
                 translationX = offsetX.value
                 translationY = offsetY.value + yOffset
@@ -127,11 +125,11 @@ fun SwipeableCard(
                 } else Modifier
             )
     ) {
-        // Card content
+        // Card content - SQUARE aspect ratio (1:1)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.75f)
+                .aspectRatio(1f) // Square!
                 .shadow(16.dp, RoundedCornerShape(24.dp))
                 .clip(RoundedCornerShape(24.dp))
                 .background(
@@ -147,28 +145,32 @@ fun SwipeableCard(
                 // Gender symbol
                 Text(
                     text = genderSymbol,
-                    fontSize = 32.sp,
+                    fontSize = 28.sp,
+                    fontFamily = Poppins,
                     color = Color.White.copy(alpha = 0.9f)
                 )
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 
-                // Name
+                // Name - Poppins Bold
                 Text(
                     text = card.name,
-                    fontSize = 48.sp,
+                    fontSize = 44.sp,
+                    fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     textAlign = TextAlign.Center
                 )
                 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 
                 // Set title
                 Text(
                     text = card.setTitle,
-                    fontSize = 16.sp,
-                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontFamily = Poppins,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center
                 )
             }
@@ -180,7 +182,7 @@ fun SwipeableCard(
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .padding(24.dp)
+                            .padding(20.dp)
                             .background(
                                 LikeGreen.copy(alpha = (offsetX.value / 200f).coerceIn(0f, 1f)),
                                 RoundedCornerShape(8.dp)
@@ -190,8 +192,9 @@ fun SwipeableCard(
                         Text(
                             text = "LIKE",
                             color = Color.White,
+                            fontFamily = Poppins,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
+                            fontSize = 20.sp
                         )
                     }
                 }
@@ -201,7 +204,7 @@ fun SwipeableCard(
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(24.dp)
+                            .padding(20.dp)
                             .background(
                                 DismissRed.copy(alpha = (-offsetX.value / 200f).coerceIn(0f, 1f)),
                                 RoundedCornerShape(8.dp)
@@ -211,8 +214,9 @@ fun SwipeableCard(
                         Text(
                             text = "NOPE",
                             color = Color.White,
+                            fontFamily = Poppins,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
+                            fontSize = 20.sp
                         )
                     }
                 }

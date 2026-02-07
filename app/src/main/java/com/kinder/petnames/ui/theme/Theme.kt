@@ -56,6 +56,7 @@ fun PetnamesTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = Typography,
         content = content
     )
 }

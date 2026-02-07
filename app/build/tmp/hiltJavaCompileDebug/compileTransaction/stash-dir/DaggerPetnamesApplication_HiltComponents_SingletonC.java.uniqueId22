@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.kinder.petnames.core.AnalyticsManager;
 import com.kinder.petnames.core.PreferencesManager;
+import com.kinder.petnames.core.SessionManager;
 import com.kinder.petnames.core.SupabaseModule_ProvideSupabaseClientFactory;
 import com.kinder.petnames.data.HouseholdRepository;
 import com.kinder.petnames.data.LocalNamesProvider;
@@ -415,35 +416,35 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_kinder_petnames_ui_screens_FiltersViewModel = "com.kinder.petnames.ui.screens.FiltersViewModel";
-
-      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
-
       static String com_kinder_petnames_ui_screens_HomeViewModel = "com.kinder.petnames.ui.screens.HomeViewModel";
+
+      static String com_kinder_petnames_ui_screens_FiltersViewModel = "com.kinder.petnames.ui.screens.FiltersViewModel";
 
       static String com_kinder_petnames_ui_screens_ProfileViewModel = "com.kinder.petnames.ui.screens.ProfileViewModel";
 
-      static String com_kinder_petnames_ui_screens_LikesViewModel = "com.kinder.petnames.ui.screens.LikesViewModel";
+      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
 
       static String com_kinder_petnames_ui_screens_OnboardingViewModel = "com.kinder.petnames.ui.screens.OnboardingViewModel";
 
-      @KeepFieldType
-      FiltersViewModel com_kinder_petnames_ui_screens_FiltersViewModel2;
-
-      @KeepFieldType
-      MatchesViewModel com_kinder_petnames_ui_screens_MatchesViewModel2;
+      static String com_kinder_petnames_ui_screens_LikesViewModel = "com.kinder.petnames.ui.screens.LikesViewModel";
 
       @KeepFieldType
       HomeViewModel com_kinder_petnames_ui_screens_HomeViewModel2;
 
       @KeepFieldType
+      FiltersViewModel com_kinder_petnames_ui_screens_FiltersViewModel2;
+
+      @KeepFieldType
       ProfileViewModel com_kinder_petnames_ui_screens_ProfileViewModel2;
 
       @KeepFieldType
-      LikesViewModel com_kinder_petnames_ui_screens_LikesViewModel2;
+      MatchesViewModel com_kinder_petnames_ui_screens_MatchesViewModel2;
 
       @KeepFieldType
       OnboardingViewModel com_kinder_petnames_ui_screens_OnboardingViewModel2;
+
+      @KeepFieldType
+      LikesViewModel com_kinder_petnames_ui_screens_LikesViewModel2;
     }
   }
 
@@ -499,23 +500,17 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_kinder_petnames_ui_screens_LikesViewModel = "com.kinder.petnames.ui.screens.LikesViewModel";
-
-      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
-
       static String com_kinder_petnames_ui_screens_FiltersViewModel = "com.kinder.petnames.ui.screens.FiltersViewModel";
 
       static String com_kinder_petnames_ui_screens_ProfileViewModel = "com.kinder.petnames.ui.screens.ProfileViewModel";
 
       static String com_kinder_petnames_ui_screens_OnboardingViewModel = "com.kinder.petnames.ui.screens.OnboardingViewModel";
 
+      static String com_kinder_petnames_ui_screens_MatchesViewModel = "com.kinder.petnames.ui.screens.MatchesViewModel";
+
+      static String com_kinder_petnames_ui_screens_LikesViewModel = "com.kinder.petnames.ui.screens.LikesViewModel";
+
       static String com_kinder_petnames_ui_screens_HomeViewModel = "com.kinder.petnames.ui.screens.HomeViewModel";
-
-      @KeepFieldType
-      LikesViewModel com_kinder_petnames_ui_screens_LikesViewModel2;
-
-      @KeepFieldType
-      MatchesViewModel com_kinder_petnames_ui_screens_MatchesViewModel2;
 
       @KeepFieldType
       FiltersViewModel com_kinder_petnames_ui_screens_FiltersViewModel2;
@@ -525,6 +520,12 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
 
       @KeepFieldType
       OnboardingViewModel com_kinder_petnames_ui_screens_OnboardingViewModel2;
+
+      @KeepFieldType
+      MatchesViewModel com_kinder_petnames_ui_screens_MatchesViewModel2;
+
+      @KeepFieldType
+      LikesViewModel com_kinder_petnames_ui_screens_LikesViewModel2;
 
       @KeepFieldType
       HomeViewModel com_kinder_petnames_ui_screens_HomeViewModel2;
@@ -564,7 +565,7 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
           return (T) new MatchesViewModel(singletonCImpl.matchesRepositoryProvider.get(), singletonCImpl.preferencesManagerProvider.get(), singletonCImpl.analyticsManagerProvider.get());
 
           case 4: // com.kinder.petnames.ui.screens.OnboardingViewModel 
-          return (T) new OnboardingViewModel(singletonCImpl.householdRepositoryProvider.get(), singletonCImpl.preferencesManagerProvider.get(), singletonCImpl.analyticsManagerProvider.get());
+          return (T) new OnboardingViewModel(singletonCImpl.householdRepositoryProvider.get(), singletonCImpl.preferencesManagerProvider.get(), singletonCImpl.analyticsManagerProvider.get(), singletonCImpl.sessionManagerProvider.get());
 
           case 5: // com.kinder.petnames.ui.screens.ProfileViewModel 
           return (T) new ProfileViewModel(singletonCImpl.householdRepositoryProvider.get(), singletonCImpl.swipesRepositoryProvider.get(), singletonCImpl.preferencesManagerProvider.get(), singletonCImpl.analyticsManagerProvider.get());
@@ -665,6 +666,8 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
 
     private Provider<HouseholdRepository> householdRepositoryProvider;
 
+    private Provider<SessionManager> sessionManagerProvider;
+
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
       initialize(applicationContextModuleParam);
@@ -681,10 +684,11 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
       this.swipesRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SwipesRepository>(singletonCImpl, 5));
       this.matchesRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<MatchesRepository>(singletonCImpl, 6));
       this.householdRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<HouseholdRepository>(singletonCImpl, 7));
+      this.sessionManagerProvider = DoubleCheck.provider(new SwitchingProvider<SessionManager>(singletonCImpl, 8));
     }
 
     @Override
-    public void injectPetnamesApplication(PetnamesApplication arg0) {
+    public void injectPetnamesApplication(PetnamesApplication petnamesApplication) {
     }
 
     @Override
@@ -739,6 +743,9 @@ public final class DaggerPetnamesApplication_HiltComponents_SingletonC {
 
           case 7: // com.kinder.petnames.data.HouseholdRepository 
           return (T) new HouseholdRepository(singletonCImpl.provideSupabaseClientProvider.get());
+
+          case 8: // com.kinder.petnames.core.SessionManager 
+          return (T) new SessionManager(singletonCImpl.provideSupabaseClientProvider.get());
 
           default: throw new AssertionError(id);
         }
