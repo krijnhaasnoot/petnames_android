@@ -81,17 +81,19 @@ fun HomeScreen(
                     // Card stack (show up to 3 cards)
                     uiState.cardStack.take(3).reversed().forEachIndexed { reversedIndex, card ->
                         val index = uiState.cardStack.take(3).size - 1 - reversedIndex
-                        SwipeableCard(
-                            card = card,
-                            isTopCard = index == 0,
-                            stackIndex = index,
-                            onSwipe = { direction ->
-                                when (direction) {
-                                    SwipeDirection.RIGHT -> viewModel.likeCard()
-                                    SwipeDirection.LEFT -> viewModel.dismissCard()
+                        key(card.id) { // Use key to ensure each card gets fresh animation state
+                            SwipeableCard(
+                                card = card,
+                                isTopCard = index == 0,
+                                stackIndex = index,
+                                onSwipe = { direction ->
+                                    when (direction) {
+                                        SwipeDirection.RIGHT -> viewModel.likeCard()
+                                        SwipeDirection.LEFT -> viewModel.dismissCard()
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }

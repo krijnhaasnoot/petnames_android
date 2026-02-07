@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kinder.petnames.core.AnalyticsManager
 import com.kinder.petnames.core.PreferencesManager
+import com.kinder.petnames.core.SessionManager
 import com.kinder.petnames.data.SwipesRepository
 import com.kinder.petnames.domain.LikedNameRow
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,8 @@ data class LikesUiState(
 class LikesViewModel @Inject constructor(
     private val swipesRepository: SwipesRepository,
     private val preferencesManager: PreferencesManager,
-    private val analyticsManager: AnalyticsManager
+    private val analyticsManager: AnalyticsManager,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(LikesUiState())
@@ -31,15 +33,25 @@ class LikesViewModel @Inject constructor(
         loadLikes()
     }
     
-    private fun loadLikes() {
+    fun loadLikes() {
         viewModelScope.launch {
-            val householdId = preferencesManager.householdId.first() ?: return@launch
-            val userId = preferencesManager.userId.first() ?: return@launch
+            val householdId = preferencesManager.householdId.first() ?: run {
+                println("❌ LikesViewModel: No householdId")
+                return@launch
+            }
+            val userId = preferencesManager.userId.first() 
+                ?: sessionManager.currentUserId.value 
+                ?: run {
+                    println("❌ LikesViewModel: No userId")
+                    return@launch
+                }
             
+            println("📋 Loading likes for household=$householdId, user=$userId")
             _uiState.update { it.copy(isLoading = true) }
             
             try {
                 val likes = swipesRepository.fetchLikes(householdId, userId)
+                println("✅ Got ${likes.size} likes")
                 _uiState.update {
                     it.copy(
                         likes = likes,
@@ -50,6 +62,7 @@ class LikesViewModel @Inject constructor(
                 // Track analytics
                 analyticsManager.trackLikesViewed(likes.size)
             } catch (e: Exception) {
+                println("❌ Error loading likes: ${e.message}")
                 _uiState.update {
                     it.copy(
                         isLoading = false,

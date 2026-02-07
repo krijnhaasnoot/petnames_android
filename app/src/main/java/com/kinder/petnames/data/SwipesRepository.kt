@@ -6,6 +6,7 @@ import com.kinder.petnames.domain.SwipeDecision
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.rpc
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -26,6 +27,7 @@ class SwipesRepository @Inject constructor(
         nameId: String,
         decision: SwipeDecision
     ) {
+        println("📝 Inserting swipe: nameId=$nameId, decision=${decision.value}")
         supabase.postgrest
             .from("swipes")
             .upsert(
@@ -36,6 +38,7 @@ class SwipesRepository @Inject constructor(
                     "decision" to decision.value
                 )
             )
+        println("✅ Swipe inserted")
     }
     
     /**
@@ -49,20 +52,31 @@ class SwipesRepository @Inject constructor(
         gender: String,
         decision: SwipeDecision
     ): Boolean {
+        println("📝 Inserting swipe by name: $name, decision=${decision.value}")
+        
         @Serializable
-        data class SwipeByNameResult(val is_match: Boolean = false)
+        data class SwipeByNameResult(
+            @SerialName("is_match") val isMatch: Boolean = false
+        )
         
-        val result = supabase.postgrest.rpc(
-            function = "swipe_by_name",
-            parameters = buildJsonObject {
-                put("p_household_id", householdId)
-                put("p_name", name)
-                put("p_gender", gender)
-                put("p_decision", decision.value)
-            }
-        ).decodeSingleOrNull<SwipeByNameResult>()
-        
-        return result?.is_match ?: false
+        return try {
+            val result = supabase.postgrest.rpc(
+                function = "swipe_by_name",
+                parameters = buildJsonObject {
+                    put("p_household_id", householdId)
+                    put("p_name", name)
+                    put("p_gender", gender)
+                    put("p_decision", decision.value)
+                }
+            ).decodeSingleOrNull<SwipeByNameResult>()
+            
+            println("✅ Swipe by name result: isMatch=${result?.isMatch}")
+            result?.isMatch ?: false
+        } catch (e: Exception) {
+            println("⚠️ swipe_by_name failed: ${e.message}")
+            // Fallback: just return false, the swipe should still be tracked locally
+            false
+        }
     }
     
     /**
@@ -89,51 +103,123 @@ class SwipesRepository @Inject constructor(
         userId: String
     ): Boolean {
         @Serializable
-        data class MatchCheckResult(val is_match: Boolean = false)
+        data class MatchCheckResult(
+            @SerialName("is_match") val isMatch: Boolean = false
+        )
         
-        val result = supabase.postgrest.rpc(
-            function = "check_match_by_name",
-            parameters = buildJsonObject {
-                put("p_household_id", householdId)
-                put("p_name", name)
-                put("p_user_id", userId)
-            }
-        ).decodeSingleOrNull<MatchCheckResult>()
-        
-        return result?.is_match ?: false
+        return try {
+            val result = supabase.postgrest.rpc(
+                function = "check_match_by_name",
+                parameters = buildJsonObject {
+                    put("p_household_id", householdId)
+                    put("p_name", name)
+                    put("p_user_id", userId)
+                }
+            ).decodeSingleOrNull<MatchCheckResult>()
+            
+            result?.isMatch ?: false
+        } catch (e: Exception) {
+            println("⚠️ check_match_by_name failed: ${e.message}")
+            false
+        }
     }
     
     /**
-     * Fetch user's liked names
+     * Fetch user's liked names using direct query (like iOS)
      */
     suspend fun fetchLikes(householdId: String, userId: String): List<LikedNameRow> {
-        return supabase.postgrest.rpc(
-            function = "get_user_likes",
-            parameters = buildJsonObject {
-                put("p_household_id", householdId)
-                put("p_user_id", userId)
+        println("📋 Fetching likes for household=$householdId, user=$userId")
+        
+        @Serializable
+        data class SwipeWithName(
+            @SerialName("name_id") val nameId: String,
+            val names: NameData?
+        )
+        
+        @Serializable
+        data class NameData(
+            val name: String,
+            val gender: String,
+            @SerialName("name_sets") val nameSets: SetData?
+        )
+        
+        @Serializable
+        data class SetData(
+            val title: String
+        )
+        
+        return try {
+            val swipes = supabase.postgrest
+                .from("swipes")
+                .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("""
+                    name_id,
+                    names!inner(name, gender, name_sets!inner(title))
+                """.trimIndent())) {
+                    filter {
+                        eq("household_id", householdId)
+                        eq("user_id", userId)
+                        eq("decision", "like")
+                    }
+                }
+                .decodeList<SwipeWithName>()
+            
+            println("✅ Got ${swipes.size} likes from server")
+            
+            swipes.mapNotNull { swipe ->
+                swipe.names?.let { nameData ->
+                    LikedNameRow(
+                        nameId = swipe.nameId,
+                        name = nameData.name,
+                        gender = nameData.gender,
+                        setTitle = nameData.nameSets?.title ?: "Unknown"
+                    )
+                }
             }
-        ).decodeList<LikedNameRow>()
+        } catch (e: Exception) {
+            println("❌ Error fetching likes: ${e.message}")
+            e.printStackTrace()
+            emptyList()
+        }
     }
     
     /**
      * Fetch swipe counts
      */
     suspend fun fetchCounts(householdId: String, userId: String): SwipeCounts {
-        @Serializable
-        data class CountsResult(val likes: Int = 0, val dismisses: Int = 0)
-        
-        val result = supabase.postgrest.rpc(
-            function = "get_swipe_counts",
-            parameters = buildJsonObject {
-                put("p_household_id", householdId)
-                put("p_user_id", userId)
-            }
-        ).decodeSingleOrNull<CountsResult>()
-        
-        return SwipeCounts(
-            likes = result?.likes ?: 0,
-            dismisses = result?.dismisses ?: 0
-        )
+        return try {
+            // Count likes
+            val likesCount = supabase.postgrest
+                .from("swipes")
+                .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("count")) {
+                    filter {
+                        eq("household_id", householdId)
+                        eq("user_id", userId)
+                        eq("decision", "like")
+                    }
+                    count(io.github.jan.supabase.postgrest.query.Count.EXACT)
+                }
+                .countOrNull() ?: 0
+            
+            // Count dismisses
+            val dismissesCount = supabase.postgrest
+                .from("swipes")
+                .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("count")) {
+                    filter {
+                        eq("household_id", householdId)
+                        eq("user_id", userId)
+                        eq("decision", "dismiss")
+                    }
+                    count(io.github.jan.supabase.postgrest.query.Count.EXACT)
+                }
+                .countOrNull() ?: 0
+            
+            SwipeCounts(
+                likes = likesCount.toInt(),
+                dismisses = dismissesCount.toInt()
+            )
+        } catch (e: Exception) {
+            println("❌ Error fetching counts: ${e.message}")
+            SwipeCounts(likes = 0, dismisses = 0)
+        }
     }
 }
