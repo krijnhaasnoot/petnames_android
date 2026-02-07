@@ -53,11 +53,11 @@ fun SwipeableCard(
     val scale = 1f - (stackIndex * 0.04f)
     val yOffset = stackIndex * 12f
     
-    // Gender-based gradient colors (matching iOS)
+    // Gender-based gradient colors
     val gradientColors = when (card.gender.lowercase()) {
-        "female" -> listOf(Color(0xFFFF2C55), Color(0xFFFF5C7A))  // Pink
-        "male" -> listOf(Color(0xFF1491F4), Color(0xFF4DB3FF))    // Blue
-        "neutral" -> listOf(Color(0xFF2CB3B0), Color(0xFF5DD4D1)) // Teal
+        "female" -> listOf(Color(0xFFFF6B7A), Color(0xFFFF8A96))  // Pink/Coral
+        "male" -> listOf(Color(0xFF4A90E2), Color(0xFF6BA8F0))    // Blue
+        "neutral" -> listOf(Color(0xFF2DBAA6), Color(0xFF4DD4C0)) // Teal
         else -> listOf(Color(0xFF11998E), Color(0xFF38EF7D))      // Green
     }
     

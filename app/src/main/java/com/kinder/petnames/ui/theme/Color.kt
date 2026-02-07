@@ -7,9 +7,9 @@ val PrimaryPurple = Color(0xFF667EEA)
 val PrimaryPurpleDark = Color(0xFF764BA2)
 
 // Gender colors
-val MaleColor = Color(0xFF1491F4)
-val FemaleColor = Color(0xFFFF2C55)
-val NeutralColor = Color(0xFF2CB3B0)
+val MaleColor = Color(0xFF4A90E2)
+val FemaleColor = Color(0xFFFF6B7A)
+val NeutralColor = Color(0xFF2DBAA6)
 val AnyGenderColor = Color(0xFF38EF7D)
 
 // Action colors
